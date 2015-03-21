@@ -15,7 +15,7 @@ public class ApiServletInitializer extends AbstractAnnotationConfigDispatcherSer
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[]{ApiConfig.class};
+        return new Class<?>[]{ApiServletConfig.class};
     }
 
     @Override
@@ -30,8 +30,8 @@ public class ApiServletInitializer extends AbstractAnnotationConfigDispatcherSer
 
     @Configuration
     @EnableWebMvc
-    @ComponentScan(basePackageClasses = ApiConfig.class)
-    static class ApiConfig extends WebMvcConfigurerAdapter {
+    @ComponentScan(basePackageClasses = ApiServletConfig.class)
+    static class ApiServletConfig extends WebMvcConfigurerAdapter {
     }
 
 }

@@ -1,4 +1,4 @@
-package springsecurity.api;
+package springsecurity.api.hello;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -2,7 +2,6 @@ package springsecurity.app;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -15,7 +14,7 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[]{AppConfig.class};
+        return new Class<?>[]{AppServletConfig.class};
     }
 
     @Override
@@ -30,8 +29,8 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
 
     @Configuration
     @EnableWebMvc
-    @ComponentScan(basePackageClasses = AppConfig.class)
-    static class AppConfig extends WebMvcConfigurerAdapter {
+    @ComponentScan(basePackageClasses = AppServletConfig.class)
+    static class AppServletConfig extends WebMvcConfigurerAdapter {
         @Override
         public void configureViewResolvers(ViewResolverRegistry registry) {
             registry.beanName();
@@ -49,11 +48,6 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
         public void addViewControllers(ViewControllerRegistry registry) {
             registry.addViewController("/")
                     .setViewName("welcome/home");
-            registry.addViewController("/login").
-                    setViewName("auth/login");
-            registry.addViewController("/unauthorized")
-                    .setStatusCode(HttpStatus.UNAUTHORIZED)
-                    .setViewName("auth/login");
         }
     }
 

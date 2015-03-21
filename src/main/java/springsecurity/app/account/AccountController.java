@@ -1,4 +1,4 @@
-package springsecurity.app;
+package springsecurity.app.account;
 
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;

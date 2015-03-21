@@ -1,4 +1,4 @@
-package springsecurity.domain.repository;
+package springsecurity.domain.repository.account;
 
 import org.apache.ibatis.annotations.Select;
 import springsecurity.domain.model.Account;

@@ -25,11 +25,11 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/unauthorized", "/login").anonymous()
+                .antMatchers("/unauthorized", "/login", "/authenticate").anonymous()
                 .anyRequest().authenticated();
         http.formLogin()
                 .loginPage("/unauthorized")
-                .loginProcessingUrl("/login")
+                .loginProcessingUrl("/authenticate")
                 .failureUrl("/login?error");
         http.logout()
                 .logoutSuccessUrl("/")
