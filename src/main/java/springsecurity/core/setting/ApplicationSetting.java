@@ -7,6 +7,8 @@ import java.io.Serializable;
 @Component
 public class ApplicationSetting implements Serializable {
 
+    static final long serialVersionUID = 1L;
+
     private String name;
 
     public String getName() {

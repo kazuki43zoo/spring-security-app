@@ -10,6 +10,7 @@ import springsecurity.domain.service.security.AccountUserDetails;
 @Controller
 @RequestMapping("/account")
 public class AccountController {
+
     @RequestMapping
     public String view(
             @AuthenticationPrincipal AccountUserDetails userDetails,

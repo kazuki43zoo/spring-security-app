@@ -6,6 +6,8 @@ import java.io.Serializable;
 
 public class LoginForm implements Serializable {
 
+    static final long serialVersionUID = 1L;
+
     @NotNull
     private String username;
 

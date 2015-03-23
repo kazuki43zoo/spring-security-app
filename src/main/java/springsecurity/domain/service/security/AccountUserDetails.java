@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import springsecurity.domain.model.Account;
 
 public class AccountUserDetails extends User {
+
     private final Account account;
 
     public AccountUserDetails(Account account) {
@@ -17,4 +18,5 @@ public class AccountUserDetails extends User {
     public Account getAccount() {
         return account;
     }
+
 }

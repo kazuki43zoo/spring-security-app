@@ -1,7 +1,6 @@
 package springsecurity.support.config;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -9,10 +8,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +24,9 @@ public final class SpringSecurityJavaConfigSupport {
         return new OrRequestMatcher(requestMatchers);
     }
 
-    public static AuthenticationEntryPoint sendErrorEntryPoint(final HttpStatus httpStatus) {
-        return new AuthenticationEntryPoint() {
-            public void commence(HttpServletRequest request, HttpServletResponse
-                    response, AuthenticationException authException)
-                    throws IOException, ServletException {
-                response.sendError(httpStatus.value());
-            }
+    public static AuthenticationEntryPoint sendErrorEntryPoint(HttpStatus httpStatus) {
+        return (request, response, authException) -> {
+            response.sendError(httpStatus.value());
         };
     }
 

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class SpringJavaConfigSupport {
+
     private static PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     private SpringJavaConfigSupport() {
