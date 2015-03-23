@@ -15,7 +15,7 @@ class EnvConfigs {
     static class LocalEnvConfig {
 
         @Bean
-        public DataSource dataSource() {
+        DataSource dataSource() {
             return new EmbeddedDatabaseBuilder()
                     .setType(EmbeddedDatabaseType.H2)
                     .setName("spring-security")

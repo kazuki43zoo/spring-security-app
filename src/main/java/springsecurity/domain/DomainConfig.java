@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 public class DomainConfig {
 
     @Bean
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
+    SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
         SqlSessionFactory factory =
@@ -29,7 +29,7 @@ public class DomainConfig {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager(DataSource dataSource) {
+    PlatformTransactionManager transactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 

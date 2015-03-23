@@ -21,7 +21,7 @@ import static springsecurity.support.config.SpringSecurityJavaConfigSupport.*;
 class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -50,12 +50,11 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void configureDaoAuthentication(
+    void configureDaoAuthentication(
             AuthenticationManagerBuilder auth,
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) throws Exception {
+            UserDetailsService userDetailsService) throws Exception {
         auth.userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder);
+                .passwordEncoder(passwordEncoder());
     }
 
 

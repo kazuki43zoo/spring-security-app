@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.resource.ResourceUrlEncodingFilter;
+import springsecurity.core.CoreConfig;
 import springsecurity.domain.DomainConfig;
 import springsecurity.support.config.SpringJavaConfigSupport.PropertyConfig;
 
@@ -35,19 +36,19 @@ public class WebApplicationInitializer extends AbstractSecurityWebApplicationIni
                 .addMappingForUrlPatterns(EnumSet.of(DispatcherType.FORWARD), true, "/authenticate");
     }
 
-    private static CharacterEncodingFilter characterEncoding() {
+    static CharacterEncodingFilter characterEncoding() {
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
         characterEncodingFilter.setEncoding(DEFAULT_CHARACTER_ENCODING.name());
         characterEncodingFilter.setForceEncoding(true);
         return characterEncodingFilter;
     }
 
-    private static ResourceUrlEncodingFilter resourceUrlEncoding() {
+    static ResourceUrlEncodingFilter resourceUrlEncoding() {
         return new ResourceUrlEncodingFilter();
     }
 
     @Configuration
-    @Import({PropertyConfig.class, EnvConfigs.class, DomainConfig.class})
+    @Import({PropertyConfig.class, EnvConfigs.class, CoreConfig.class, DomainConfig.class})
     static class WebApplicationConfig {
     }
 

@@ -1,5 +1,6 @@
 package springsecurity.support.config;
 
+import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,14 +29,28 @@ public final class SpringJavaConfigSupport {
     @Configuration
     public static class PropertyConfig {
         @Bean
-        public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
+        static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
             PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
-            configurer.setLocations(resources(
-                    "classpath*:/config/default/**/*.properties",
-                    "classpath*:/config/" + System.getProperty("app.env", "local") + "/**/*.properties"
-            ));
+            configurer.setLocations(propertyResources());
             return configurer;
         }
+
+        @Bean
+        static PropertyOverrideConfigurer propertyOverrideConfigurer() throws IOException {
+            PropertyOverrideConfigurer configurer = new PropertyOverrideConfigurer();
+            configurer.setIgnoreInvalidKeys(true);
+            configurer.setLocations(propertyResources());
+            return configurer;
+        }
+
+        @Bean
+        static Resource[] propertyResources() throws IOException {
+            return resources(
+                    "classpath*:/config/default/**/*.properties",
+                    "classpath*:/config/" + System.getProperty("app.env", "local") + "/**/*.properties"
+            );
+        }
+
     }
 
 }
