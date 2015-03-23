@@ -8,10 +8,12 @@ This application is configured using the JavaConfig mechanism of JavaEE and Spri
 * MyBatis : [3.2.8](http://mybatis.github.io/mybatis-3/)
 * And more ...
 
-> Note : The version of library except the MyBatis has been managed using [Spring IO Platform 1.1.1.RELEASE](http://docs.spring.io/platform/docs/1.1.1.RELEASE/reference/htmlsingle/).
+> **Note:**
+>
+> The version of library except the MyBatis has been managed using [Spring IO Platform 1.1.1.RELEASE](http://docs.spring.io/platform/docs/1.1.1.RELEASE/reference/htmlsingle/).
 
 
-# How to build and run
+# How to build and run with the Tomcat
 
 ## Gradle
 
@@ -27,7 +29,7 @@ $ mvn clean tomcat7:run
 
 # How to access to the top page
 
-Please access to the http://localhost:8080/spring-security-app/.
+Please access to the [http://localhost:8080/spring-security-app/](http://localhost:8080/spring-security-app/).
 
 # Describe a configuration of web application
 
