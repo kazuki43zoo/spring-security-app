@@ -1,5 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 *.iml
 target
+build
 .idea
+.gradle
 log

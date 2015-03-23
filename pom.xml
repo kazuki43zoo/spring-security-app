@@ -18,7 +18,7 @@
         <!-- Build settings -->
         <source.encoding>UTF-8</source.encoding>
         <java.source.version>1.8</java.source.version>
-        <java.target.version>${java.source.version}</java.target.version>
+        <java.target.version>1.8</java.target.version>
     </properties>
 
     <dependencyManagement>
