@@ -17,11 +17,27 @@ This application is configured using the JavaConfig mechanism of JavaEE and Spri
 
 ## Gradle
 
+### Build only
+
+```bash
+$ gradle clean build
+```
+
+### Build and run
+
 ```bash
 $ gradle clean TomcatRun
 ```
 
 ## Maven
+
+### Build only
+
+```bash
+$ mvn clean package
+```
+
+### Build and run
 
 ```bash
 $ mvn clean tomcat7:run
