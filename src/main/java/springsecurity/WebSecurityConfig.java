@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static springsecurity.support.SpringSecurityJavaConfigSupport.*;
+import static springsecurity.support.config.SpringSecurityJavaConfigSupport.*;
 
 @Configuration
 @EnableWebSecurity

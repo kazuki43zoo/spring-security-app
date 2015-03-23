@@ -1,4 +1,4 @@
-package springsecurity.support;
+package springsecurity.support.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
