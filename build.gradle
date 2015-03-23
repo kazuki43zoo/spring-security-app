@@ -42,7 +42,7 @@ dependencies {
     compile "org.springframework.security:spring-security-web"
     compile "org.springframework.security:spring-security-config"
     compile "org.springframework.security:spring-security-taglibs"
-    // MyBatis
+    // MyBatis (O/R Mapper)
     compile "org.mybatis:mybatis:${myBatisVersion}"
     compile "org.mybatis:mybatis-spring:${myBatisSpringVersion}"
     // Java APIs
