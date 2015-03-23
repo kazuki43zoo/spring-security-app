@@ -1,24 +1,27 @@
-apply plugin: 'java'
-apply plugin: 'war'
-apply plugin: 'io.spring.dependency-management'
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "io.spring.dependency-management"
+apply plugin: "com.bmuschko.tomcat"
 
-group = 'com.github.kazuki43zoo'
-version = '1.0.0-SNAPSHOT'
+group = "com.github.kazuki43zoo"
+version = "1.0.0-SNAPSHOT"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-def sourceEncoding = 'UTF-8'
+def sourceEncoding = "UTF-8"
 
-def springIoPlatformVersion = '1.1.1.RELEASE'
-def myBatisVersion = '3.2.8'
-def myBatisSpringVersion = '1.2.2'
+def springIoPlatformVersion = "1.1.1.RELEASE"
+def myBatisVersion = "3.2.8"
+def myBatisSpringVersion = "1.2.2"
+def tomcatVersion = "7.0.59"
 
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'io.spring.gradle:dependency-management-plugin:0.4.1.RELEASE'
+        classpath "io.spring.gradle:dependency-management-plugin:0.4.1.RELEASE"
+        classpath "com.bmuschko:gradle-tomcat-plugin:2.1"
     }
 }
 
@@ -28,27 +31,38 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom 'io.spring.platform:platform-bom:' + springIoPlatformVersion
+        mavenBom "io.spring.platform:platform-bom:${springIoPlatformVersion}"
     }
 }
 
 dependencies {
-    compile 'org.springframework:spring-webmvc'
-    compile 'org.springframework.security:spring-security-web'
-    compile 'org.springframework.security:spring-security-config'
-    compile 'org.springframework.security:spring-security-taglibs'
-    compile 'org.mybatis:mybatis:' + myBatisVersion
-    compile 'org.mybatis:mybatis-spring:' + myBatisSpringVersion
-    compile 'javax.servlet:jstl'
-    providedCompile 'javax.servlet:javax.servlet-api'
-    compile 'com.h2database:h2'
-    compile 'org.slf4j:jcl-over-slf4j'
-    compile 'ch.qos.logback:logback-classic'
-    compile 'com.fasterxml.jackson.core:jackson-databind'
-    compile 'org.hibernate:hibernate-validator'
+    // Spring MVC
+    compile "org.springframework:spring-webmvc"
+    // Spring Security
+    compile "org.springframework.security:spring-security-web"
+    compile "org.springframework.security:spring-security-config"
+    compile "org.springframework.security:spring-security-taglibs"
+    // MyBatis
+    compile "org.mybatis:mybatis:${myBatisVersion}"
+    compile "org.mybatis:mybatis-spring:${myBatisSpringVersion}"
+    // Java APIs
+    compile "javax.servlet:jstl"
+    providedCompile "javax.servlet:javax.servlet-api"
+    // Database
+    compile "com.h2database:h2"
+    // Logging
+    compile "org.slf4j:jcl-over-slf4j"
+    compile "ch.qos.logback:logback-classic"
+    // Jackson
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    // Bean Validation
+    compile "org.hibernate:hibernate-validator"
+    // Tomcat
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 }
 
 compileJava {
     options.encoding = sourceEncoding
 }
-
