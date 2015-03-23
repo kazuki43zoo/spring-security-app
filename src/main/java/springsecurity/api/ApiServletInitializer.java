@@ -2,9 +2,11 @@ package springsecurity.api;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+import springsecurity.support.config.SpringJavaConfigSupport.PropertyConfig;
 
 public class ApiServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -29,8 +31,9 @@ public class ApiServletInitializer extends AbstractAnnotationConfigDispatcherSer
     }
 
     @Configuration
-    @ComponentScan(basePackageClasses = ApiServletConfig.class)
     @EnableWebMvc
+    @Import(PropertyConfig.class)
+    @ComponentScan(basePackageClasses = ApiServletConfig.class)
     static class ApiServletConfig extends WebMvcConfigurerAdapter {
     }
 

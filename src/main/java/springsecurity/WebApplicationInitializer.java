@@ -6,6 +6,7 @@ import org.springframework.security.web.context.AbstractSecurityWebApplicationIn
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.resource.ResourceUrlEncodingFilter;
 import springsecurity.domain.DomainConfig;
+import springsecurity.support.config.SpringJavaConfigSupport.PropertyConfig;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
@@ -46,9 +47,8 @@ public class WebApplicationInitializer extends AbstractSecurityWebApplicationIni
     }
 
     @Configuration
-    @Import({EnvConfigs.class, DomainConfig.class})
+    @Import({PropertyConfig.class, EnvConfigs.class, DomainConfig.class})
     static class WebApplicationConfig {
-
     }
 
 }
