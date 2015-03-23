@@ -3,6 +3,7 @@ package springsecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,6 +12,8 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static springsecurity.support.SpringSecurityJavaConfigSupport.*;
 
 @Configuration
 @EnableWebSecurity
@@ -24,18 +27,24 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // authorize
         http.authorizeRequests()
-                .antMatchers("/unauthorized", "/login", "/authenticate").anonymous()
+                .antMatchers("/login", "/authenticate").anonymous()
                 .anyRequest().authenticated();
+        http.exceptionHandling().
+                defaultAuthenticationEntryPointFor(
+                        sendErrorEntryPoint(HttpStatus.UNAUTHORIZED), antRequestMatcher("/api/**"));
+        // authenticate
         http.formLogin()
-                .loginPage("/unauthorized")
+                .loginPage("/login?error=unauthorized")
                 .loginProcessingUrl("/authenticate")
-                .failureUrl("/login?error");
+                .failureHandler(failureUrl("/login?error=failed", true));
         http.logout()
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login?logout")
                 .deleteCookies("JSESSIONID");
+        // session management
         http.sessionManagement()
-                .invalidSessionUrl("/")
+                .invalidSessionUrl("/login?invalidSession")
                 .sessionFixation().migrateSession()
                 .maximumSessions(1).expiredUrl("/");
     }
@@ -48,5 +57,6 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
     }
+
 
 }

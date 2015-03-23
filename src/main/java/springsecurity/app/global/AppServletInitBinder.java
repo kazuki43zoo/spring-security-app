@@ -1,4 +1,4 @@
-package springsecurity.app;
+package springsecurity.app.global;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.web.bind.WebDataBinder;

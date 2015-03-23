@@ -3,6 +3,7 @@ package springsecurity.app;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -28,8 +29,8 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
     }
 
     @Configuration
-    @EnableWebMvc
     @ComponentScan(basePackageClasses = AppServletConfig.class)
+    @EnableWebMvc
     static class AppServletConfig extends WebMvcConfigurerAdapter {
         @Override
         public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -41,7 +42,9 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
             registry.addResourceHandler("/resources/**")
-                    .addResourceLocations("/resources");
+                    .addResourceLocations("/resources")
+                    .resourceChain(false)
+                    .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
         }
 
         @Override
@@ -49,6 +52,7 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
             registry.addViewController("/")
                     .setViewName("welcome/home");
         }
+
     }
 
 }

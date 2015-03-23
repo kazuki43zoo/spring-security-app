@@ -6,7 +6,7 @@
 
     <groupId>com.github.kazuki43zoo</groupId>
     <artifactId>spring-security-app</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
@@ -15,8 +15,10 @@
         <tomcat.version>7.0.57</tomcat.version>
         <mybatis.version>3.2.8</mybatis.version>
         <mybatis-spring.version>1.2.2</mybatis-spring.version>
-        <!-- Plugin dependency versions -->
-        <org.apache.tomcat.maven.version>2.2</org.apache.tomcat.maven.version>
+        <!-- Build settings -->
+        <source.encoding>UTF-8</source.encoding>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>${java.source.version}</java.target.version>
     </properties>
 
     <dependencyManagement>
@@ -91,6 +93,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- Bean Validation -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -104,7 +107,7 @@
                 <plugin>
                     <groupId>org.apache.tomcat.maven</groupId>
                     <artifactId>tomcat7-maven-plugin</artifactId>
-                    <version>${org.apache.tomcat.maven.version}</version>
+                    <version>2.2</version>
                     <configuration>
                         <useBodyEncodingForURI>true</useBodyEncodingForURI>
                         <systemProperties>
@@ -217,8 +220,79 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+                <!-- Build settings for packaging -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.2</version>
+                    <configuration>
+                        <encoding>${source.encoding}</encoding>
+                        <source>${java.source.version}</source>
+                        <target>${java.target.version}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <encoding>${source.encoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.18.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.1</version>
+                    <configuration>
+                        <encoding>${source.encoding}</encoding>
+                        <docencoding>${source.encoding}</docencoding>
+                        <locale>en</locale>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>javadoc-jar</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.4</version>
+                    <executions>
+                        <execution>
+                            <id>source-jar</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

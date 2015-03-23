@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@Controller("/login")
+@Controller
+@RequestMapping("/login")
 public class LoginController {
 
     @ModelAttribute
@@ -17,22 +18,28 @@ public class LoginController {
         return new LoginForm("demo", "demo");
     }
 
-    @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
+    public String view() {
+        return "auth/login";
+    }
+
+    @RequestMapping(params = "error=unauthorized", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String unauthorized() {
         return view();
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String view() {
-        return "auth/login";
-    }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public String login(@Validated LoginForm form, BindingResult result) {
         if (result.hasErrors()) {
             return view();
         }
         return "forward:/authenticate";
     }
+
+    @RequestMapping(params = "error=failed", method = RequestMethod.POST)
+    public String loginFailed(LoginForm form) {
+        return view();
+    }
+
 }

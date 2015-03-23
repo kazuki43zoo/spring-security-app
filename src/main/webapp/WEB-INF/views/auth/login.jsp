@@ -24,7 +24,7 @@
             </tr>
             <tr>
                 <td><form:label path="password">Password:</form:label></td>
-                <td><form:input path="password"/>(demo)</td>
+                <td><form:password path="password" showPassword="true"/>(demo)</td>
                 <td><form:errors path="password"/></td>
             </tr>
             <tr>

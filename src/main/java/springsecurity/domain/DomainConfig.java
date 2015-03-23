@@ -14,8 +14,8 @@ import javax.sql.DataSource;
 
 @Configuration
 @ComponentScan(basePackageClasses = DomainConfig.class)
+@MapperScan(basePackages = "springsecurity.domain.repository")
 @EnableTransactionManagement
-@MapperScan("springsecurity.domain.repository")
 public class DomainConfig {
 
     @Bean
