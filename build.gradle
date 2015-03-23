@@ -8,12 +8,13 @@ version = "1.0.0-SNAPSHOT"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-def sourceEncoding = "UTF-8"
-
-def springIoPlatformVersion = "1.1.1.RELEASE"
-def myBatisVersion = "3.2.8"
-def myBatisSpringVersion = "1.2.2"
-def tomcatVersion = "7.0.59"
+ext {
+    sourceEncoding = "UTF-8"
+    springIoPlatformVersion = "1.1.1.RELEASE"
+    myBatisVersion = "3.2.8"
+    myBatisSpringVersion = "1.2.2"
+    tomcatVersion = "7.0.59"
+}
 
 buildscript {
     repositories {
