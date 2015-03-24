@@ -1,5 +1,6 @@
 package springsecurity.app;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -7,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 import springsecurity.support.config.SpringJavaConfigSupport.PropertyConfig;
+
+import java.util.concurrent.TimeUnit;
 
 public class AppServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -36,6 +39,9 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
     @ComponentScan(basePackageClasses = AppServletConfig.class)
     static class AppServletConfig extends WebMvcConfigurerAdapter {
 
+        @Value("${resourceChain:false}")
+        boolean resourceChain;
+
         @Override
         public void configureViewResolvers(ViewResolverRegistry registry) {
             registry.beanName();
@@ -47,7 +53,8 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
             registry.addResourceHandler("/resources/**")
                     .addResourceLocations("/resources")
-                    .resourceChain(false)
+                    .setCachePeriod(Long.valueOf(TimeUnit.DAYS.toSeconds(1)).intValue())
+                    .resourceChain(resourceChain)
                     .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
         }
 
