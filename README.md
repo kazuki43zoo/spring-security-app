@@ -26,7 +26,7 @@ $ gradle clean build
 ### Build and run
 
 ```bash
-$ gradle clean TomcatRun
+$ gradle clean tomcatRun
 ```
 
 ## Maven
