@@ -45,23 +45,20 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
         @Override
         public void configureViewResolvers(ViewResolverRegistry registry) {
             registry.beanName();
-            registry.jsp().
-                    prefix("/WEB-INF/views/");
+            registry.jsp().prefix("/WEB-INF/views/");
         }
 
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
-            registry.addResourceHandler("/resources/**")
-                    .addResourceLocations("/resources")
-                    .setCachePeriod(Long.valueOf(TimeUnit.DAYS.toSeconds(1)).intValue())
+            registry.addResourceHandler("/resources/**").addResourceLocations("/resources/")
+                    .setCachePeriod((int)TimeUnit.DAYS.toSeconds(1))
                     .resourceChain(resourceChain)
                     .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
         }
 
         @Override
         public void addViewControllers(ViewControllerRegistry registry) {
-            registry.addViewController("/")
-                    .setViewName("welcome/home");
+            registry.addViewController("/").setViewName("welcome/home");
         }
 
     }
