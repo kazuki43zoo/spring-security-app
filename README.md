@@ -1,7 +1,7 @@
 # Spring Security Sample Application with JavaConfig
 
 This is a sample application using with Spring Security, Spring MVC and MyBatis3.
-This application is configured using the JavaConfig mechanism of JavaEE and Spring Framework.
+This application is configured using the JavaConfig mechanism of Servlet API and Spring Framework.
 
 * Spring Security : [3.2.5.RELEASE](http://docs.spring.io/spring-security/site/docs/3.2.5.RELEASE/reference/htmlsingle/) (Mainly)
 * Spring MVC : [4.1.4.RELEASE](http://docs.spring.io/spring/docs/4.1.4.RELEASE/spring-framework-reference/htmlsingle/)
