@@ -26,8 +26,8 @@ public class WebApplicationInitializer extends AbstractSecurityWebApplicationIni
     @Override
     protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
         insertFilters(servletContext,
-                characterEncoding(),
-                resourceUrlEncoding());
+                createCharacterEncodingFilter(),
+                createResourceUrlEncodingFilter());
     }
 
     @Override
@@ -36,14 +36,14 @@ public class WebApplicationInitializer extends AbstractSecurityWebApplicationIni
                 .addMappingForUrlPatterns(EnumSet.of(DispatcherType.FORWARD), true, "/authenticate");
     }
 
-    static CharacterEncodingFilter characterEncoding() {
+    static CharacterEncodingFilter createCharacterEncodingFilter() {
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
         characterEncodingFilter.setEncoding(DEFAULT_CHARACTER_ENCODING.name());
         characterEncodingFilter.setForceEncoding(true);
         return characterEncodingFilter;
     }
 
-    static ResourceUrlEncodingFilter resourceUrlEncoding() {
+    static ResourceUrlEncodingFilter createResourceUrlEncodingFilter() {
         return new ResourceUrlEncodingFilter();
     }
 

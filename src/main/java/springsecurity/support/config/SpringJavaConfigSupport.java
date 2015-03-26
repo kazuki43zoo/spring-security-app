@@ -1,9 +1,9 @@
 package springsecurity.support.config;
 
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -29,9 +29,10 @@ public final class SpringJavaConfigSupport {
 
     @Configuration
     public static class PropertyConfig {
+
         @Bean
-        static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() throws IOException {
-            PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
+        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() throws IOException {
+            PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
             configurer.setLocations(propertyResources());
             return configurer;
         }

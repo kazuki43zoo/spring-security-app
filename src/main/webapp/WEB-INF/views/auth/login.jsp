@@ -19,12 +19,12 @@
         <table>
             <tr>
                 <td><form:label path="username">User:</form:label></td>
-                <td><form:input path="username"/>(demo)</td>
+                <td><form:input path="username"/>(<c:out value="${securitySetting.demoUsername}" /> )</td>
                 <td><form:errors path="username"/></td>
             </tr>
             <tr>
                 <td><form:label path="password">Password:</form:label></td>
-                <td><form:password path="password" showPassword="true"/>(demo)</td>
+                <td><form:password path="password" showPassword="true"/>(<c:out value="${securitySetting.demoPassword}" />)</td>
                 <td><form:errors path="password"/></td>
             </tr>
             <tr>
