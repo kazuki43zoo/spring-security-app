@@ -10,11 +10,18 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
+import org.springframework.validation.BindingResult;
 import springsecurity.WebApplicationInitializer;
 import springsecurity.WebSecurityConfig;
+import springsecurity.app.AppServletInitializer;
+import springsecurity.app.auth.LoginForm;
+import springsecurity.core.setting.SecuritySetting;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.UUID;
 
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.IsNot.*;
@@ -22,9 +29,12 @@ import static org.hamcrest.core.IsNull.*;
 import static org.junit.Assert.*;
 
 
-@ContextConfiguration(classes = {
-    WebApplicationInitializer.WebApplicationConfig.class,
-    WebSecurityConfig.class
+@ContextHierarchy({
+        @ContextConfiguration(classes = {
+                WebApplicationInitializer.WebApplicationConfig.class,
+                WebSecurityConfig.class
+        }),
+        @ContextConfiguration(classes = AppServletInitializer.AppServletConfig.class)
 })
 public class AnonymousUserSecurityTest extends ITestSupport {
 
@@ -32,9 +42,6 @@ public class AnonymousUserSecurityTest extends ITestSupport {
     public void accessTopPage() throws IOException, ServletException {
 
         get("/").perform();
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
 
         assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
@@ -44,21 +51,22 @@ public class AnonymousUserSecurityTest extends ITestSupport {
 
     @Test
     public void accessLoginPage() throws IOException, ServletException {
-
         get("/login").perform();
 
-        assertThat(mockFilterChain.getRequest(), notNullValue());
-        assertThat(mockFilterChain.getResponse(), notNullValue());
+        assertThat("http status code:",
+                response.getStatus(), is(HttpStatus.OK.value()));
+        assertThat("forwarded url:",
+                response.getForwardedUrl(), is(jspPath("auth/login")));
 
+        LoginForm loginForm = LoginForm.class.cast(request.getAttribute("loginForm"));
+        SecuritySetting securitySetting = SecuritySetting.class.cast(request.getAttribute("securitySetting"));
+        assertThat(loginForm.getUsername(), is(securitySetting.getDemoUsername()));
+        assertThat(loginForm.getPassword(), is(securitySetting.getDemoPassword()));
     }
 
     @Test
     public void accessApi() throws IOException, ServletException {
-
         get("/api").perform();
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
 
         assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.UNAUTHORIZED.value()));
@@ -70,15 +78,9 @@ public class AnonymousUserSecurityTest extends ITestSupport {
 
     @Test
     public void accessTopPageWithInvalidSession() throws IOException, ServletException {
+        invalidSession();
 
-        request.setRequestedSessionId("invalidSessionId");
-        request.setRequestedSessionIdValid(false);
-        request.setSession(null);
-
-        get("/").perform();
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
+        get("/").reset(false).perform();
 
         assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
@@ -87,29 +89,28 @@ public class AnonymousUserSecurityTest extends ITestSupport {
     }
 
     @Test
+    public void loginInputCheckIsOk() throws IOException, ServletException {
+        authentication().path("/login").username("demo").password("demo").csrfToken(getCsrfToken()).perform();
+
+        assertThat("forwarded url:",
+                response.getForwardedUrl(), is("/authenticate"));
+    }
+
+    @Test
     public void authenticateSuccess() throws IOException, ServletException {
         get("/account").perform();
 
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
+        CsrfToken csrfToken = loadCsrfToken();
 
-        CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
+        authentication().username("demo").password("demo").perform();
 
-        authentication()
-                .username("demo").password("demo").csrfToken(csrfToken)
-                .perform();
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
-
-        MockHttpSession newMockHttpSession = MockHttpSession.class.cast(request.getSession());
-        CsrfToken newCsrfToken = CsrfToken.class.cast(
-                newMockHttpSession.getAttribute(HttpSessionCsrfTokenRepository.class.getName().concat(".CSRF_TOKEN")));
+        MockHttpSession newSession = MockHttpSession.class.cast(request.getSession());
+        CsrfToken newCsrfToken = loadCsrfToken();
 
         assertTrue("session status (before authentication):", session.isInvalid());
-        assertFalse("session status (after authentication):", newMockHttpSession.isInvalid());
+        assertFalse("session status (after authentication):", newSession.isInvalid());
         assertThat("session id:",
-                newMockHttpSession.getId(), not(is(session.getId())));
+                newSession.getId(), not(is(session.getId())));
         assertThat("csrf token:",
                 newCsrfToken.getToken(), not(is(csrfToken.getToken())));
 
@@ -120,29 +121,43 @@ public class AnonymousUserSecurityTest extends ITestSupport {
     }
 
     @Test
+    public void authenticateFailureCauseByCredentialIsEmpty() throws IOException, ServletException {
+        authentication().path("/login").username("").password("").csrfToken(getCsrfToken()).perform();
+
+        assertThat("redirect url:",
+                response.getForwardedUrl(), is(jspPath("auth/login")));
+
+        BindingResult result = getBindingResult("loginForm");
+        assertThat("binding error count:",
+                result.getErrorCount(), is(2));
+        assertTrue("binding error username:",
+                Arrays.asList(result.getFieldError("username").getCodes()).contains("NotNull"));
+        assertTrue("binding error password:",
+                Arrays.asList(result.getFieldError("password").getCodes()).contains("NotNull"));
+
+        LoginForm loginForm = LoginForm.class.cast(request.getAttribute("loginForm"));
+        assertThat(loginForm.getUsername(), nullValue());
+        assertThat(loginForm.getPassword(), nullValue());
+    }
+
+    @Test
     public void authenticateFailureCauseByUserNotFound() throws IOException, ServletException {
-
-        CsrfToken csrfToken = getCsrfToken();
-
         authentication()
-                .username("unknownUser").password("demo").csrfToken(csrfToken)
+                .username("unknownUser").password("demo").csrfToken(getCsrfToken())
                 .perform();
 
-        assertThat("redirect url",
+        assertThat("forwarded url:",
                 response.getForwardedUrl(), is("/login?error=failed"));
     }
 
     @Test
     public void authenticateFailureCauseByPasswordMismatch() throws IOException, ServletException {
-        CsrfToken csrfToken = getCsrfToken();
-
         authentication()
-                .username("demo").password("xxxx").csrfToken(csrfToken)
+                .username("demo").password("xxxx").csrfToken(getCsrfToken())
                 .perform();
 
-        assertThat("redirect url",
+        assertThat("forwarded url:",
                 response.getForwardedUrl(), is("/login?error=failed"));
     }
-
 
 }

@@ -1,7 +1,6 @@
 package springsecurity.itest;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -12,6 +11,7 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -19,13 +19,18 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.UUID;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {
         ITestConfig.class
 })
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ITestSupport {
+public abstract class ITestSupport {
+
+    private static final String CSRF_TOKEN_SESSION_KEY = HttpSessionCsrfTokenRepository.class.getName() + ".CSRF_TOKEN";
+    private static final String CSRF_TOKEN_REQUEST_KEY = CsrfToken.class.getName();
+    private static final String BINDING_RESULT_BASE_KEY = BindingResult.class.getName() + ".";
 
     @Autowired
     WebApplicationContext wac;
@@ -45,6 +50,8 @@ public class ITestSupport {
     @Autowired
     FilterChainProxy filterChainProxy;
 
+    DispatcherServlet dispatcherServlet;
+
     MockFilterChain mockFilterChain;
 
     @Before
@@ -53,9 +60,13 @@ public class ITestSupport {
     }
 
     protected MockFilterChain createMockFilterChain() throws ServletException {
-        DispatcherServlet servlet = new DispatcherServlet(wac);
-        servlet.init(new MockServletConfig("appServlet"));
-        return new MockFilterChain(servlet);
+        this.dispatcherServlet = createDispatcherServlet();
+        dispatcherServlet.init(new MockServletConfig("dispatcherServlet"));
+        return new MockFilterChain(dispatcherServlet);
+    }
+
+    protected DispatcherServlet createDispatcherServlet() throws ServletException {
+        return new DispatcherServlet(wac);
     }
 
     protected void reset() {
@@ -68,20 +79,38 @@ public class ITestSupport {
         request.setSession(httpSession);
     }
 
+    protected void invalidSession() {
+        request.setRequestedSessionId(UUID.randomUUID().toString());
+        request.setRequestedSessionIdValid(false);
+        request.setSession(null);
+    }
+
     protected String jspPath(String viewName) {
         return "/WEB-INF/views/" + viewName + ".jsp";
     }
 
+
     protected CsrfToken loadCsrfToken() {
         CsrfToken csrfToken = CsrfToken.class.cast(
-                request.getSession(false).getAttribute(HttpSessionCsrfTokenRepository.class.getName().concat(".CSRF_TOKEN")));
+                request.getSession(false).getAttribute(CSRF_TOKEN_SESSION_KEY));
+        if (csrfToken != null) {
+            return csrfToken;
+        }
+        csrfToken = CsrfToken.class.cast(request.getAttribute(CSRF_TOKEN_REQUEST_KEY));
+        if (csrfToken != null) {
+            csrfToken.getToken();
+        }
         return csrfToken;
     }
 
     protected CsrfToken getCsrfToken() throws IOException, ServletException {
         get("/").perform();
-        CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
-        return csrfToken;
+        return CsrfToken.class.cast(request.getAttribute(CSRF_TOKEN_REQUEST_KEY));
+    }
+
+    protected BindingResult getBindingResult(String modelName) {
+        String attributeName = BINDING_RESULT_BASE_KEY + modelName;
+        return BindingResult.class.cast(request.getAttribute(attributeName));
     }
 
 
@@ -97,26 +126,88 @@ public class ITestSupport {
         return new Get().path(path);
     }
 
-    protected class Get {
-        private String path;
+    protected Post post(String path) {
+        return new Post().path(path);
+    }
 
-        public Get path(String path) {
+    private abstract class Request<T> {
+        private String path = "/";
+        protected HttpMethod method = HttpMethod.GET;
+        private CsrfToken csrfToken;
+        private boolean reset = true;
+        private boolean security = true;
+
+        @SuppressWarnings("unchecked")
+        public T path(String path) {
             this.path = path;
-            return this;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T method(HttpMethod method) {
+            this.method = method;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T csrfToken(CsrfToken csrfToken) {
+            this.csrfToken = csrfToken;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T reset(boolean reset) {
+            this.reset = reset;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T security(boolean security) {
+            this.security = security;
+            return (T) this;
         }
 
         public void perform() throws IOException, ServletException {
+            if (reset) {
+                ITestSupport.this.reset();
+            }
             request.setServletPath(path);
             request.setRequestURI(path);
-            request.setMethod(HttpMethod.GET.name());
+            request.setMethod(method.name());
             request.addHeader("Accept", "text/html");
+            if (csrfToken != null) {
+                request.setParameter(csrfToken.getParameterName(), csrfToken.getToken());
+            }
+            setupRequest();
+            if (security) {
+                filterChainProxy.doFilter(request, response, mockFilterChain);
+            } else {
+                dispatcherServlet.service(request, response);
+            }
+        }
+
+        protected void setupRequest() {
         }
     }
 
-    protected class Authentication {
+    protected class Post extends Request<Post> {
+        private Post() {
+            method(HttpMethod.POST).csrfToken(loadCsrfToken());
+        }
+    }
+
+    protected class Get extends Request<Get> {
+        private Get() {
+        }
+    }
+
+    protected class Authentication extends Request<Authentication> {
         private String username;
         private String password;
-        private CsrfToken csrfToken;
+
+        private Authentication() {
+            path("/authenticate").method(HttpMethod.POST).csrfToken(loadCsrfToken());
+        }
 
         public Authentication username(String username) {
             this.username = username;
@@ -128,20 +219,10 @@ public class ITestSupport {
             return this;
         }
 
-        public Authentication csrfToken(CsrfToken csrfToken) {
-            this.csrfToken = csrfToken;
-            return this;
-        }
-
-        public void perform() throws IOException, ServletException {
-            reset();
+        public void setupRequest() {
             request.setRequestURI("/login");
-            request.setServletPath("/login");
             request.setParameter("username", username);
             request.setParameter("password", password);
-            request.setParameter(csrfToken.getParameterName(), csrfToken.getToken());
-            request.setMethod(HttpMethod.POST.name());
-            filterChainProxy.doFilter(request, response, mockFilterChain);
         }
 
     }
@@ -160,19 +241,10 @@ public class ITestSupport {
         }
 
         public void perform() throws IOException, ServletException {
-            reset();
 
-            request.setServletPath("/login");
-            request.setRequestURI("/login");
-            request.setMethod(HttpMethod.GET.name());
-            request.addHeader("Accept", "text/html");
+            get("/login").perform();
 
-            filterChainProxy.doFilter(request, response, mockFilterChain);
-
-            CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
-
-            authentication.csrfToken(csrfToken);
-            authentication.perform();
+            authentication.csrfToken(loadCsrfToken()).perform();
 
             reset();
         }

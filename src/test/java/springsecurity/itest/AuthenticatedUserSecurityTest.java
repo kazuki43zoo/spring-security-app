@@ -1,5 +1,6 @@
 package springsecurity.itest;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -23,69 +24,41 @@ import static org.junit.Assert.*;
 
 
 @ContextHierarchy({
-    @ContextConfiguration(classes = {
-        WebApplicationInitializer.WebApplicationConfig.class,
-        WebSecurityConfig.class
-    }),
-    @ContextConfiguration(classes = AppServletInitializer.AppServletConfig.class)
+        @ContextConfiguration(classes = {
+                WebApplicationInitializer.WebApplicationConfig.class,
+                WebSecurityConfig.class
+        }),
+        @ContextConfiguration(classes = AppServletInitializer.AppServletConfig.class)
 })
 public class AuthenticatedUserSecurityTest extends ITestSupport {
 
+    @Before
+    public void doLogin() throws IOException, ServletException {
+        login().username("demo").password("demo").perform();
+    }
+
     @Test
     public void accessTopPage() throws IOException, ServletException {
+        get("/").perform();
 
-        login()
-                .username("demo").password("demo")
-                .perform();
-
-        request.setServletPath("/");
-        request.setMethod(HttpMethod.GET.name());
-        request.addHeader("Accept", "text/html");
-
-        filterChainProxy.doFilter(request, response, mockFilterChain);
-
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.OK.value()));
         assertThat("forwarded url:",
                 response.getForwardedUrl(), is(jspPath("welcome/home")));
-
     }
 
 
     @Test
     public void accessLoginPage() throws IOException, ServletException {
+        get("/login").perform();
 
-        login()
-                .username("demo").password("demo")
-                .perform();
-
-        request.setServletPath("/login");
-        request.setMethod(HttpMethod.GET.name());
-        request.addHeader("Accept", "text/html");
-
-        filterChainProxy.doFilter(request, response, mockFilterChain);
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
-
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FORBIDDEN.value()));
-
-
     }
 
     @Test
     public void accessAllowedResource() throws IOException, ServletException {
-
-        login()
-                .username("demo").password("demo")
-                .perform();
-
-        request.setServletPath("/account");
-        request.setMethod(HttpMethod.GET.name());
-        request.addHeader("Accept", "text/html");
-
-        filterChainProxy.doFilter(request, response, mockFilterChain);
+        get("/account").perform();
 
         assertThat("http status code : ",
                 response.getStatus(), is(HttpStatus.OK.value()));
@@ -94,59 +67,27 @@ public class AuthenticatedUserSecurityTest extends ITestSupport {
 
         Account account = Account.class.cast(request.getAttribute("account"));
         assertThat(account.getUsername(), is("demo"));
-
     }
 
     @Test
     public void accessNotAllowedResource() throws IOException, ServletException {
+        get("/admin").perform();
 
-        login()
-                .username("demo").password("demo")
-                .perform();
-
-        request.setServletPath("/admin/");
-        request.setRequestURI("/admin/");
-        request.setMethod(HttpMethod.GET.name());
-        request.addHeader("Accept", "text/html");
-
-        filterChainProxy.doFilter(request, response, mockFilterChain);
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
-
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FORBIDDEN.value()));
-
     }
 
     @Test
     public void logout() throws IOException, ServletException {
+        post("/logout").perform();
 
-        login()
-                .username("demo").password("demo")
-                .perform();
-
-        CsrfToken csrfToken = loadCsrfToken();
-
-        request.setServletPath("/logout");
-        request.setRequestURI("/logout");
-        request.setMethod(HttpMethod.POST.name());
-        request.addParameter(csrfToken.getParameterName(), csrfToken.getToken());
-        request.addHeader("Accept", "text/html");
-        filterChainProxy.doFilter(request, response, mockFilterChain);
-
-        assertThat(mockFilterChain.getRequest(), nullValue());
-        assertThat(mockFilterChain.getResponse(), nullValue());
-
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
-        assertThat("redirect url",
+        assertThat("redirect url:",
                 response.getRedirectedUrl(), is("/login?logout"));
 
         assertThat(request.getSession(false), nullValue());
         assertThat(response.getCookie("JSESSIONID").getValue(), nullValue());
-
     }
-
 
 }

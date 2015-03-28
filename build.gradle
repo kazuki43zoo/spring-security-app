@@ -63,9 +63,12 @@ dependencies {
     tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
     tomcat "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 
-    // JUnit
+    // Test
     testCompile "junit:junit"
-    compile "org.springframework:spring-test"
+    testCompile "org.springframework:spring-test"
+    testCompile "org.apache.tomcat:tomcat-el-api:${tomcatVersion}"
+
+
 }
 
 [compileJava, compileTestJava]*.options*.encoding = sourceEncoding
