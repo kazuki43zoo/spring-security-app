@@ -1,14 +1,9 @@
 package springsecurity.itest;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.*;
-import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.validation.BindingResult;
@@ -21,7 +16,6 @@ import springsecurity.core.setting.SecuritySetting;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.UUID;
 
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.IsNot.*;
@@ -40,7 +34,6 @@ public class AnonymousUserSecurityTest extends ITestSupport {
 
     @Test
     public void accessTopPage() throws IOException, ServletException {
-
         get("/").perform();
 
         assertThat("http status code:",

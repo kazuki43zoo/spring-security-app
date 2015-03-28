@@ -130,9 +130,10 @@ public abstract class ITestSupport {
         return new Post().path(path);
     }
 
-    private abstract class Request<T> {
+    private abstract class AbstractRequest<T> {
         private String path = "/";
-        protected HttpMethod method = HttpMethod.GET;
+        private HttpMethod method = HttpMethod.GET;
+        private String accept = "text/html";
         private CsrfToken csrfToken;
         private boolean reset = true;
         private boolean security = true;
@@ -146,6 +147,12 @@ public abstract class ITestSupport {
         @SuppressWarnings("unchecked")
         public T method(HttpMethod method) {
             this.method = method;
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T accept(String accept) {
+            this.accept = accept;
             return (T) this;
         }
 
@@ -174,7 +181,7 @@ public abstract class ITestSupport {
             request.setServletPath(path);
             request.setRequestURI(path);
             request.setMethod(method.name());
-            request.addHeader("Accept", "text/html");
+            request.addHeader("Accept", accept);
             if (csrfToken != null) {
                 request.setParameter(csrfToken.getParameterName(), csrfToken.getToken());
             }
@@ -190,18 +197,18 @@ public abstract class ITestSupport {
         }
     }
 
-    protected class Post extends Request<Post> {
+    protected class Post extends AbstractRequest<Post> {
         private Post() {
             method(HttpMethod.POST).csrfToken(loadCsrfToken());
         }
     }
 
-    protected class Get extends Request<Get> {
+    protected class Get extends AbstractRequest<Get> {
         private Get() {
         }
     }
 
-    protected class Authentication extends Request<Authentication> {
+    protected class Authentication extends AbstractRequest<Authentication> {
         private String username;
         private String password;
 
@@ -241,11 +248,8 @@ public abstract class ITestSupport {
         }
 
         public void perform() throws IOException, ServletException {
-
             get("/login").perform();
-
             authentication.csrfToken(loadCsrfToken()).perform();
-
             reset();
         }
 
