@@ -2,7 +2,6 @@ package springsecurity.itest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -11,8 +10,6 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import springsecurity.WebApplicationInitializer;
 import springsecurity.WebSecurityConfig;
 
@@ -25,27 +22,14 @@ import static org.hamcrest.core.IsNull.*;
 import static org.junit.Assert.*;
 
 
-@WebAppConfiguration
 @ContextConfiguration(classes = {
         WebApplicationInitializer.WebApplicationConfig.class,
         WebSecurityConfig.class
 })
-@RunWith(SpringJUnit4ClassRunner.class)
-public class AnonymousUserSecurityTest {
-
-    @Autowired
-    MockHttpSession session;
-
-    @Autowired
-    MockHttpServletRequest request;
-
-    @Autowired
-    MockHttpServletResponse response;
+public class AnonymousUserSecurityTest extends ITestSupport {
 
     @Autowired
     FilterChainProxy filterChainProxy;
-
-    MockFilterChain mockFilterChain;
 
     @Before
     public void setupMockFilterChain() {
@@ -63,9 +47,9 @@ public class AnonymousUserSecurityTest {
         assertThat(mockFilterChain.getRequest(), nullValue());
         assertThat(mockFilterChain.getResponse(), nullValue());
 
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
-        assertThat("redirect url",
+        assertThat("redirect url:",
                 response.getRedirectedUrl(), is("http://localhost/login?error=unauthorized"));
     }
 
@@ -93,11 +77,11 @@ public class AnonymousUserSecurityTest {
         assertThat(mockFilterChain.getRequest(), nullValue());
         assertThat(mockFilterChain.getResponse(), nullValue());
 
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.UNAUTHORIZED.value()));
-        assertThat("redirected url",
+        assertThat("redirected url:",
                 response.getRedirectedUrl(), nullValue());
-        assertThat("forwarded url",
+        assertThat("forwarded url:",
                 response.getForwardedUrl(), nullValue());
     }
 
@@ -117,9 +101,9 @@ public class AnonymousUserSecurityTest {
         assertThat(mockFilterChain.getRequest(), nullValue());
         assertThat(mockFilterChain.getResponse(), nullValue());
 
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
-        assertThat("redirect url",
+        assertThat("redirect url:",
                 response.getRedirectedUrl(), is("/login?invalidSession"));
     }
 
@@ -137,8 +121,7 @@ public class AnonymousUserSecurityTest {
 
         CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
 
-        response.setCommitted(false);
-        response.reset();
+        reset();
 
         request.setServletPath("/authenticate");
         request.addParameter("username", "demo");
@@ -157,20 +140,19 @@ public class AnonymousUserSecurityTest {
 
         assertTrue("session status (before authentication):", session.isInvalid());
         assertFalse("session status (after authentication):", newMockHttpSession.isInvalid());
-
         assertThat("session id:",
                 newMockHttpSession.getId(), not(is(session.getId())));
         assertThat("csrf token:",
                 newCsrfToken.getToken(), not(is(csrfToken.getToken())));
 
-        assertThat("http status code : ",
+        assertThat("http status code:",
                 response.getStatus(), is(HttpStatus.FOUND.value()));
-        assertThat("redirect url",
+        assertThat("redirect url:",
                 response.getRedirectedUrl(), is("http://localhost/account"));
     }
 
     @Test
-    public void authenticateFailure() throws IOException, ServletException {
+    public void authenticateFailureCauseByUserNotFound() throws IOException, ServletException {
         request.setServletPath("/");
         request.setMethod(HttpMethod.GET.name());
         request.addHeader("Accept", "text/html");
@@ -179,12 +161,11 @@ public class AnonymousUserSecurityTest {
 
         CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
 
-        response.setCommitted(false);
-        response.reset();
+        reset();
 
         request.setServletPath("/authenticate");
-        request.addParameter("username", "demo");
-        request.addParameter("password", "xxxx");
+        request.addParameter("username", "unknownUser"); // username is unknown
+        request.addParameter("password", "demo");
         request.addParameter(csrfToken.getParameterName(), csrfToken.getToken());
         request.setMethod(HttpMethod.POST.name());
 
@@ -193,5 +174,30 @@ public class AnonymousUserSecurityTest {
         assertThat("redirect url",
                 response.getForwardedUrl(), is("/login?error=failed"));
     }
+
+    @Test
+    public void authenticateFailureCauseByPasswordMismatch() throws IOException, ServletException {
+        request.setServletPath("/");
+        request.setMethod(HttpMethod.GET.name());
+        request.addHeader("Accept", "text/html");
+
+        filterChainProxy.doFilter(request, response, mockFilterChain);
+
+        CsrfToken csrfToken = CsrfToken.class.cast(request.getAttribute(CsrfToken.class.getName()));
+
+        reset();
+
+        request.setServletPath("/authenticate");
+        request.addParameter("username", "demo");
+        request.addParameter("password", "xxxx"); // password is mismatch
+        request.addParameter(csrfToken.getParameterName(), csrfToken.getToken());
+        request.setMethod(HttpMethod.POST.name());
+
+        filterChainProxy.doFilter(request, response, mockFilterChain);
+
+        assertThat("redirect url",
+                response.getForwardedUrl(), is("/login?error=failed"));
+    }
+
 
 }
