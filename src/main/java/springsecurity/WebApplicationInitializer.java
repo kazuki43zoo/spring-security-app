@@ -49,7 +49,7 @@ public class WebApplicationInitializer extends AbstractSecurityWebApplicationIni
 
     @Configuration
     @Import({PropertyConfig.class, EnvConfigs.class, CoreConfig.class, DomainConfig.class})
-    static class WebApplicationConfig {
+    public static class WebApplicationConfig {
     }
 
 }

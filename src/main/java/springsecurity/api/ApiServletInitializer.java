@@ -34,7 +34,7 @@ public class ApiServletInitializer extends AbstractAnnotationConfigDispatcherSer
     @EnableWebMvc
     @Import(PropertyConfig.class)
     @ComponentScan(basePackageClasses = ApiServletConfig.class)
-    static class ApiServletConfig extends WebMvcConfigurerAdapter {
+    public static class ApiServletConfig extends WebMvcConfigurerAdapter {
     }
 
 }

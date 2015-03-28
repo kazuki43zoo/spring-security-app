@@ -18,7 +18,7 @@ import static springsecurity.support.config.SpringSecurityJavaConfigSupport.*;
 @Configuration
 @EnableWebSecurity
 @EnableWebMvcSecurity
-class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -29,7 +29,9 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // authorize
         http.authorizeRequests()
-                .antMatchers("/login", "/authenticate").anonymous()
+                .antMatchers("/login").anonymous()
+                .antMatchers("/account/**").hasRole("USER")
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated();
         http.exceptionHandling().
                 defaultAuthenticationEntryPointFor(
@@ -45,8 +47,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // session management
         http.sessionManagement()
                 .invalidSessionUrl("/login?invalidSession")
-                .sessionFixation().migrateSession()
-                .maximumSessions(1).expiredUrl("/");
+                .sessionFixation().migrateSession();
     }
 
     @Autowired

@@ -37,7 +37,7 @@ public class AppServletInitializer extends AbstractAnnotationConfigDispatcherSer
     @EnableWebMvc
     @Import(PropertyConfig.class)
     @ComponentScan(basePackageClasses = AppServletConfig.class)
-    static class AppServletConfig extends WebMvcConfigurerAdapter {
+    public static class AppServletConfig extends WebMvcConfigurerAdapter {
 
         @Value("${resourceChain:false}")
         boolean resourceChain;
